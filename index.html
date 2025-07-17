@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>習慣トラッカー＆タイマー</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <button id="show-habit-tracker">習慣トラッカー</button>
+            <button id="show-study-timer">タイマー</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="habit-tracker-section" class="active-section">
+            <h2>習慣トラッカー</h2>
+            <div class="habit-input">
+                <input type="text" id="new-habit-input" placeholder="新しい習慣を追加">
+                <button id="add-habit-button">追加</button>
+            </div>
+            <ul id="habit-list">
+                </ul>
+            <button id="clear-all-checks-button" class="action-button">すべてのチェックを解除</button>
+        </section>
+
+        <section id="study-timer-section" class="hidden-section">
+            <h2>タイマー</h2>
+            <div class="timer-settings">
+                <div id="work-time-setting" class="timer-setting-section active-setting">
+                    <div class="setting-row">
+                        <label>作業時間:</label>
+                        <input type="number" id="work-time-minutes-input" value="25" min="0">
+                        <span>分</span>
+                        <input type="number" id="work-time-seconds-input" value="0" min="0" max="59">
+                        <span>秒</span>
+                    </div>
+                </div>
+
+                <div id="break-time-setting" class="timer-setting-section hidden-setting">
+                    <div class="setting-row">
+                        <label>休憩時間:</label>
+                        <input type="number" id="break-time-minutes-input" value="5" min="0">
+                        <span>分</span>
+                    </div>
+                </div>
+                
+                <div class="setting-buttons">
+                    <button id="toggle-display-type-button">切り替え</button>
+                    <button id="save-timer-settings">設定保存</button>
+                </div>
+            </div>
+            <div class="timer-display">
+                <p id="timer-type">作業</p>
+                <h1 id="time-display">25:00</h1>
+            </div>
+            <div class="timer-controls">
+                <button id="start-timer-button">開始</button>
+                <button id="pause-timer-button">一時停止</button>
+                <button id="reset-timer-button">リセット</button>
+                <button id="record-timer-button">記録</button>
+            </div>
+
+            <div class="timer-records">
+                <h3>タイマー記録</h3>
+                <ul id="timer-record-list">
+                    </ul>
+                <button id="clear-timer-records-button" class="action-button">記録の削除</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
