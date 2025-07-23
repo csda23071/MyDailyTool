@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>習慣トラッカー＆タイマー</title>
+    <title>習慣トラッカー＆学習タイマー</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
     <header>
+        <h1>習慣トラッカー＆学習タイマー</h1>
         <nav>
             <button id="show-habit-tracker">習慣トラッカー</button>
-            <button id="show-study-timer">タイマー</button>
+            <button id="show-study-timer">学習タイマー</button>
         </nav>
     </header>
 
     <main>
         <section id="habit-tracker-section" class="active-section">
             <h2>習慣トラッカー</h2>
-            <div class="habit-input">
+            <div class="input-area">
                 <input type="text" id="new-habit-input" placeholder="新しい習慣を追加">
                 <button id="add-habit-button">追加</button>
             </div>
@@ -27,50 +29,54 @@
         </section>
 
         <section id="study-timer-section" class="hidden-section">
-            <h2>タイマー</h2>
-            <div class="timer-settings">
-                <div id="work-time-setting" class="timer-setting-section active-setting">
-                    <div class="setting-row">
-                        <label>作業時間:</label>
-                        <input type="number" id="work-time-minutes-input" value="25" min="0">
-                        <span>分</span>
-                        <input type="number" id="work-time-seconds-input" value="0" min="0" max="59">
-                        <span>秒</span>
-                    </div>
-                </div>
+            <h2>学習タイマー</h2>
 
-                <div id="break-time-setting" class="timer-setting-section hidden-setting">
-                    <div class="setting-row">
-                        <label>休憩時間:</label>
-                        <input type="number" id="break-time-minutes-input" value="5" min="0">
-                        <span>分</span>
-                    </div>
-                </div>
-                
-                <div class="setting-buttons">
-                    <button id="toggle-display-type-button">切り替え</button>
-                    <button id="save-timer-settings">設定保存</button>
-                </div>
-            </div>
-            <div class="timer-display">
+            <div class="timer-display-area">
                 <p id="timer-type">作業</p>
-                <h1 id="time-display">25:00</h1>
+                <div id="time-display" class="time-display">00:00</div>
             </div>
+            
             <div class="timer-controls">
                 <button id="start-timer-button">開始</button>
                 <button id="pause-timer-button">一時停止</button>
                 <button id="reset-timer-button">リセット</button>
-                <button id="record-timer-button">記録</button>
+                <button id="record-timer-button">手動記録</button>
             </div>
 
-            <div class="timer-records">
-                <h3>タイマー記録</h3>
+            <div class="timer-settings-area">
+                <h3>タイマー設定</h3>
+                <div class="setting-controls">
+                    <button id="toggle-display-type-button" class="action-button">表示切り替え</button>
+                </div>
+                
+                <div id="work-time-setting" class="time-setting-group active-setting">
+                    <h4>作業時間</h4>
+                    <input type="number" id="work-time-minutes-input" value="30" min="0"> 分
+                    <input type="number" id="work-time-seconds-input" value="0" min="0" max="59"> 秒
+                </div>
+
+                <div id="break-time-setting" class="time-setting-group hidden-setting">
+                    <h4>休憩時間</h4>
+                    <input type="number" id="break-time-minutes-input" value="5" min="0"> 分
+                </div>
+                <button id="save-timer-settings" class="action-button">設定保存</button>
+            </div>
+
+            <div class="timer-records-area">
+                <h3>記録リスト</h3>
                 <ul id="timer-record-list">
                     </ul>
-                <button id="clear-timer-records-button" class="action-button">記録の削除</button>
+                <button id="clear-timer-records-button" class="action-button">すべての記録をクリア</button>
             </div>
         </section>
     </main>
+
+    <div id="custom-alert-modal" class="modal">
+        <div class="modal-content">
+            <p id="alert-message"></p>
+            <button id="alert-ok-button">OK</button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
