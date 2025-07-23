@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded! Script execution started.');
+
     // --- 要素の取得 ---
     const showHabitTrackerButton = document.getElementById('show-habit-tracker');
     const showStudyTimerButton = document.getElementById('show-study-timer');
@@ -28,10 +30,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const timerRecordList = document.getElementById('timer-record-list');
     const clearTimerRecordsButton = document.getElementById('clear-timer-records-button');
 
-    // ★追加：カスタムアラートの要素を取得
+    // カスタムアラートの要素を取得
     const customAlertModal = document.getElementById('custom-alert-modal');
-    let modalMessage = document.getElementById('modal-message'); // let に変更
-    let modalOkButton = document.getElementById('modal-ok-button'); // let に変更
+    const modalMessage = document.getElementById('modal-message');
+    const modalOkButton = document.getElementById('modal-ok-button');
+
+    // 要素が正しく取得されているか確認
+    console.log('Elements Check:');
+    console.log('recordTimerButton:', recordTimerButton);
+    console.log('timerRecordList:', timerRecordList);
+    console.log('customAlertModal:', customAlertModal);
+    // 他の重要な要素も適宜ログに追加して確認できます
 
     // --- グローバル変数 ---
     let habits = [];
@@ -45,147 +54,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let timerRecords = [];
 
-    // 通知音をグローバルスコープで管理できるように変更
-    // nullで初期化し、必要になったらAudioオブジェクトを割り当てる
     let notificationAudio = null;
 
     // --- 共通機能・ヘルパー関数の定義 ---
 
-    // タイマー表示を更新
-    const updateTimerDisplay = () => {
-        const minutes = Math.floor(remainingTime / 60);
-        const seconds = remainingTime % 60;
-        timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        timerTypeDisplay.textContent = currentTimerType === 'work' ? '作業' : '休憩';
-        document.title = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} | ${currentTimerType === 'work' ? '作業' : '休憩'}タイマー`;
-    };
-
-    // 設定表示の切り替え
-    const updateSettingDisplay = () => {
-        if (currentSettingDisplayType === 'work') {
-            workTimeSettingDiv.classList.add('active-setting');
-            workTimeSettingDiv.classList.remove('hidden-setting');
-            breakTimeSettingDiv.classList.add('hidden-setting');
-            breakTimeSettingDiv.classList.remove('active-setting');
-        } else {
-            workTimeSettingDiv.classList.add('hidden-setting');
-            workTimeSettingDiv.classList.remove('active-setting');
-            breakTimeSettingDiv.classList.add('active-setting');
-            breakTimeSettingDiv.classList.remove('hidden-setting');
-        }
-    };
-
-    // 通知音を鳴らす（変更あり）
-    const playNotificationSound = () => {
-        // 既存のAudioオブジェクトがあれば停止し、新しいものを作成して再生
-        if (notificationAudio) {
-            notificationAudio.pause();
-            notificationAudio.currentTime = 0; // 最初から再生
-        }
-        notificationAudio = new Audio('notification.mp3');
-        notificationAudio.loop = true; // ★追加：音をループ再生
-        notificationAudio.play().catch(e => console.error("通知音の再生に失敗しました:", e));
-    };
-
-    // 通知音を停止する（新規追加）
-    const stopNotificationSound = () => {
-        if (notificationAudio) {
-            notificationAudio.pause();
-            notificationAudio.currentTime = 0; // 再生位置を最初に戻す
-            notificationAudio = null; // リソース解放のためnullにする
-        }
-    };
-
-    // カスタムポップアップを表示する関数（新規追加）
-    const showCustomAlert = (message, onOkCallback) => {
-        modalMessage.textContent = message;
-        customAlertModal.classList.remove('hidden-modal'); // display: none を解除
-        // setTimeoutで少し遅延させてactive-modalを追加し、CSSアニメーションをトリガー
-        setTimeout(() => {
-            customAlertModal.classList.add('active-modal');
-        }, 10); // わずかな遅延
-
-        // OKボタンのイベントリスナーを一度だけ追加（複数回呼ばれるのを防ぐ）
-        // cloneNode(true) で既存の要素を複製し、古いイベントリスナーを削除する
-        const oldModalOkButton = modalOkButton;
-        const newModalOkButton = oldModalOkButton.cloneNode(true);
-        oldModalOkButton.parentNode.replaceChild(newModalOkButton, oldModalOkButton);
-        modalOkButton = newModalOkButton; // 新しい要素を再割り当て
-
-        modalOkButton.addEventListener('click', () => {
-            customAlertModal.classList.remove('active-modal');
-            // アニメーション完了後にdisplay: none; に戻す
-            customAlertModal.addEventListener('transitionend', function handler() {
-                customAlertModal.classList.add('hidden-modal');
-                customAlertModal.removeEventListener('transitionend', handler); // イベントリスナーを削除
-            });
-
-            stopNotificationSound(); // 音を停止
-            if (onOkCallback) {
-                onOkCallback(); // OK後の処理を実行
-            }
-        });
-    };
-
-
-    // タイマータイプを切り替えて、必要なら開始する関数 (自動終了時と手動切り替えの両方で使用)
-    const switchTimerTypeAndStart = (isAutoStart = false) => {
-        pauseTimer(); // 切り替える前に必ずタイマーを停止
-
-        if (currentTimerType === 'work') {
-            currentTimerType = 'break';
-            currentSettingDisplayType = 'break'; // 設定表示のタイプも連動
-            remainingTime = breakTimeTotalSeconds;
-        } else {
-            currentTimerType = 'work';
-            currentSettingDisplayType = 'work'; // 設定表示のタイプも連動
-            remainingTime = workTimeTotalSeconds;
-        }
-
-        updateTimerDisplay(); // タイマー本体の表示を更新
-        updateSettingDisplay(); // 設定入力欄の表示を更新
-
-        // isAutoStart が true で、かつ残り時間が0より大きい場合にのみ、新しいタイマーを自動的に開始
-        if (isAutoStart && remainingTime > 0) {
-            startTimer();
-        }
-    };
-
-    // タイマー記録を追加 (タイプに応じてメッセージを変更)
-    const addTimerRecord = (recordType) => {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-        // 記録時点の経過時間を正確に計算
-        const totalTimeForCurrentType = currentTimerType === 'work' ? workTimeTotalSeconds : breakTimeTotalSeconds;
-        const actualElapsedTime = totalTimeForCurrentType - remainingTime;
-
-        const elapsedMinutes = Math.floor(actualElapsedTime / 60);
-        const elapsedSeconds = actualElapsedTime % 60;
-        const formattedElapsedTime = `${elapsedMinutes.toString().padStart(2, '0')}分${elapsedSeconds.toString().padStart(2, '0')}秒`;
-
-        // 記録時点の残り時間
-        const remainingMinutes = Math.floor(remainingTime / 60);
-        const remainingSeconds = remainingTime % 60;
-        const formattedRemainingTime = `${remainingMinutes.toString().padStart(2, '0')}分${remainingSeconds.toString().padStart(2, '0')}秒`;
-
-        let recordContent = '';
-        if (recordType === 'auto') {
-            recordContent = `自動記録 (${currentTimerType === 'work' ? '作業' : '休憩'}): 経過 ${formattedElapsedTime} (残り ${formattedRemainingTime})`;
-        } else if (recordType === 'manual') {
-            recordContent = `手動記録 (${currentTimerType === 'work' ? '作業' : '休憩'}): 経過 ${formattedElapsedTime} (残り ${formattedRemainingTime})`;
-        }
-
-        if (recordContent) {
-            const recordText = `${recordContent} @ ${timeString}`;
-            timerRecords.push(recordText);
-            saveTimerRecords(); // Local Storageに保存
-            renderTimerRecords();
+    // localStorageにタイマー記録を保存
+    const saveTimerRecords = () => {
+        try {
+            localStorage.setItem('timerRecords', JSON.stringify(timerRecords));
+            console.log('Timer records saved to localStorage.'); // デバッグ用
+        } catch (e) {
+            console.error('Failed to save timer records to localStorage:', e);
+            showCustomAlert('記録の保存に失敗しました。ブラウザのストレージがいっぱいかもしれません。', null);
         }
     };
 
     // タイマー記録をUIに描画
     const renderTimerRecords = () => {
+        console.log('renderTimerRecords called. Current records:', timerRecords); // デバッグ用
         timerRecordList.innerHTML = '';
         timerRecords.forEach(record => {
             const listItem = document.createElement('li');
@@ -195,12 +81,215 @@ document.addEventListener('DOMContentLoaded', () => {
         timerRecordList.scrollTop = timerRecordList.scrollHeight;
     };
 
+    // localStorageからタイマー設定と記録をロードし、入力フィールドに反映
+    const loadTimerSettings = () => {
+        console.log('Loading timer settings and records from localStorage.'); // デバッグ用
+        const storedWorkTime = localStorage.getItem('workTime');
+        const storedBreakTime = localStorage.getItem('breakTime');
+        const storedTimerRecords = localStorage.getItem('timerRecords');
+
+        // 作業時間の設定
+        if (storedWorkTime !== null) {
+            workTimeTotalSeconds = parseInt(storedWorkTime, 10);
+            console.log('Loaded workTime:', workTimeTotalSeconds); // デバッグ用
+        } else {
+            workTimeTotalSeconds = 30 * 60;
+            console.log('No workTime found, setting default:', workTimeTotalSeconds); // デバッグ用
+        }
+        workTimeMinutesInput.value = Math.floor(workTimeTotalSeconds / 60);
+        workTimeSecondsInput.value = workTimeTotalSeconds % 60;
+
+        // 休憩時間の設定
+        if (storedBreakTime !== null) {
+            breakTimeTotalSeconds = parseInt(storedBreakTime, 10);
+            console.log('Loaded breakTime:', breakTimeTotalSeconds); // デバッグ用
+        } else {
+            breakTimeTotalSeconds = 5 * 60;
+            console.log('No breakTime found, setting default:', breakTimeTotalSeconds); // デバッグ用
+        }
+        breakTimeMinutesInput.value = Math.floor(breakTimeTotalSeconds / 60);
+
+        // タイマーモードと残り時間の初期設定
+        currentTimerType = 'work';
+        currentSettingDisplayType = 'work';
+        remainingTime = workTimeTotalSeconds;
+
+        // 記録のロード
+        if (storedTimerRecords) {
+            try {
+                timerRecords = JSON.parse(storedTimerRecords);
+                console.log('Timer records loaded successfully:', timerRecords); // デバッグ用
+            } catch (e) {
+                console.error("タイマー記録データの読み込みに失敗しました。データをリセットします。", e);
+                timerRecords = [];
+                saveTimerRecords();
+                showCustomAlert('タイマー記録データの読み込みに失敗しました。データが破損している可能性があります。', null);
+            }
+        } else {
+            timerRecords = [];
+            console.log('No timer records found in localStorage. Initializing empty array.'); // デバッグ用
+        }
+        renderTimerRecords();
+
+        updateTimerDisplay();
+        updateSettingDisplay();
+    };
+
+    // タイマー表示を更新
+    const updateTimerDisplay = () => {
+        const minutes = Math.floor(remainingTime / 60);
+        const seconds = remainingTime % 60;
+        timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        timerTypeDisplay.textContent = currentTimerType === 'work' ? '作業' : '休憩';
+        document.title = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} | ${currentTimerType === 'work' ? '作業' : '休憩'}タイマー`;
+        // console.log('Timer Display Updated:', timeDisplay.textContent); // デバッグ用
+    };
+
+    // 設定表示の切り替え
+    const updateSettingDisplay = () => {
+        if (currentSettingDisplayType === 'work') {
+            workTimeSettingDiv.classList.add('active-setting');
+            workTimeSettingDiv.classList.remove('hidden-setting');
+            breakTimeSettingDiv.classList.add('hidden-section'); // ここは hidden-section が正しい
+            breakTimeSettingDiv.classList.remove('active-setting');
+        } else {
+            workTimeSettingDiv.classList.add('hidden-section'); // ここは hidden-section が正しい
+            workTimeSettingDiv.classList.remove('active-setting');
+            breakTimeSettingDiv.classList.add('active-setting');
+            breakTimeSettingDiv.classList.remove('hidden-section');
+        }
+        // console.log('Setting Display Updated. Current type:', currentSettingDisplayType); // デバッグ用
+    };
+
+    // 通知音を鳴らす
+    const playNotificationSound = () => {
+        console.log('Attempting to play notification sound.'); // デバッグ用
+        if (notificationAudio) {
+            notificationAudio.pause();
+            notificationAudio.currentTime = 0;
+        }
+        notificationAudio = new Audio('notification.mp3'); // notification.mp3 を用意してください
+        notificationAudio.loop = true; // 音をループ再生
+        notificationAudio.play().catch(e => console.error("通知音の再生に失敗しました:", e));
+    };
+
+    // 通知音を停止する
+    const stopNotificationSound = () => {
+        console.log('Attempting to stop notification sound.'); // デバッグ用
+        if (notificationAudio) {
+            notificationAudio.pause();
+            notificationAudio.currentTime = 0;
+            notificationAudio = null;
+        }
+    };
+
+    // カスタムポップアップを表示する関数
+    let currentAlertCallback = null;
+
+    // OKボタンのイベントリスナーを一度だけ設定
+    modalOkButton.addEventListener('click', () => {
+        console.log('Alert OK button clicked.'); // デバッグ用
+        customAlertModal.classList.remove('active-modal');
+        customAlertModal.addEventListener('transitionend', function handler() {
+            customAlertModal.classList.add('hidden-modal');
+            customAlertModal.removeEventListener('transitionend', handler);
+        });
+
+        stopNotificationSound();
+        if (currentAlertCallback) {
+            currentAlertCallback();
+            currentAlertCallback = null;
+        }
+    });
+
+    const showCustomAlert = (message, onOkCallback) => {
+        console.log('Showing custom alert:', message); // デバッグ用
+        modalMessage.textContent = message;
+        currentAlertCallback = onOkCallback;
+
+        customAlertModal.classList.remove('hidden-modal');
+        setTimeout(() => {
+            customAlertModal.classList.add('active-modal');
+        }, 10);
+    };
+
+
+    // タイマータイプを切り替えて、必要なら開始する関数
+    const switchTimerTypeAndStart = (isAutoStart = false) => {
+        console.log('switchTimerTypeAndStart called. isAutoStart:', isAutoStart); // デバッグ用
+        pauseTimer();
+
+        if (currentTimerType === 'work') {
+            currentTimerType = 'break';
+            currentSettingDisplayType = 'break';
+            remainingTime = breakTimeTotalSeconds;
+        } else {
+            currentTimerType = 'work';
+            currentSettingDisplayType = 'work';
+            remainingTime = workTimeTotalSeconds;
+        }
+
+        updateTimerDisplay();
+        updateSettingDisplay();
+
+        if (isAutoStart && remainingTime > 0) {
+            startTimer();
+        }
+    };
+
+    // タイマー記録を追加 (タイプに応じてメッセージを変更)
+    const addTimerRecord = (recordType) => {
+        console.log('addTimerRecord called. recordType:', recordType); // デバッグ用
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        let totalTimeForRecord = 0;
+        let timePassedForRecord = 0;
+
+        if (recordType === 'auto') {
+            totalTimeForRecord = (currentTimerType === 'work') ? workTimeTotalSeconds : breakTimeTotalSeconds;
+            timePassedForRecord = totalTimeForRecord;
+            console.log(`Auto record - Current Timer Type: ${currentTimerType}, Total Time: ${totalTimeForRecord}, Time Passed: ${timePassedForRecord}`);
+        } else { // 'manual' の場合
+            totalTimeForRecord = (currentTimerType === 'work') ? workTimeTotalSeconds : breakTimeTotalSeconds;
+            timePassedForRecord = totalTimeForRecord - remainingTime;
+            console.log(`Manual record - Current Timer Type: ${currentTimerType}, Total Time: ${totalTimeForRecord}, Time Passed: ${timePassedForRecord}, Remaining: ${remainingTime}`);
+        }
+        
+        const elapsedMinutes = Math.floor(timePassedForRecord / 60);
+        const elapsedSeconds = timePassedForRecord % 60;
+        const formattedElapsedTime = `${elapsedMinutes.toString().padStart(2, '0')}分${elapsedSeconds.toString().padStart(2, '0')}秒`;
+
+        const currentRemainingMinutes = Math.floor(remainingTime / 60);
+        const currentRemainingSeconds = remainingTime % 60;
+        const formattedCurrentRemainingTime = `${currentRemainingMinutes.toString().padStart(2, '0')}分${currentRemainingSeconds.toString().padStart(2, '0')}秒`;
+
+        let recordContent = '';
+        if (recordType === 'auto') {
+            recordContent = `自動終了 (${currentTimerType === 'work' ? '作業' : '休憩'}): 経過 ${formattedElapsedTime}`;
+        } else if (recordType === 'manual') {
+            recordContent = `手動記録 (${currentTimerType === 'work' ? '作業' : '休憩'}): 経過 ${formattedElapsedTime} (残り ${formattedCurrentRemainingTime})`;
+        }
+
+        if (recordContent) {
+            const recordText = `${recordContent} @ ${timeString}`;
+            console.log('Adding record:', recordText); // デバッグ用
+            timerRecords.push(recordText);
+            saveTimerRecords(); // ここで saveTimerRecords が呼ばれる
+            renderTimerRecords();
+        } else {
+            console.log('Record content was empty, not adding record.'); // デバッグ用
+        }
+    };
+
     // タイマー記録をすべて削除
     const clearTimerRecords = () => {
+        console.log('clearTimerRecords called.'); // デバッグ用
         if (confirm('本当にすべてのタイマー記録を削除しますか？')) {
             timerRecords = [];
             saveTimerRecords();
             renderTimerRecords();
+            console.log('All timer records cleared.'); // デバッグ用
         }
     };
 
@@ -208,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 画面遷移ロジック
     showHabitTrackerButton.addEventListener('click', () => {
+        console.log('習慣トラッカーボタンがクリックされました！'); // デバッグ用
         habitTrackerSection.classList.add('active-section');
         habitTrackerSection.classList.remove('hidden-section');
         studyTimerSection.classList.add('hidden-section');
@@ -217,6 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     showStudyTimerButton.addEventListener('click', () => {
+        console.log('タイマーボタンがクリックされました！'); // デバッグ用
         studyTimerSection.classList.add('active-section');
         studyTimerSection.classList.remove('hidden-section');
         habitTrackerSection.classList.add('hidden-section');
@@ -227,40 +318,44 @@ document.addEventListener('DOMContentLoaded', () => {
         showHabitTrackerButton.classList.remove('active');
     });
 
-    // 初期タブのアクティブ状態を設定
-    // CSSでactiveクラスを初期設定にしているので、ここでは不要
-    // if (habitTrackerSection.classList.contains('active-section')) {
-    //     showHabitTrackerButton.classList.add('active');
-    // } else {
-    //     showStudyTimerButton.classList.add('active');
-    // }
 
     // --- 習慣トラッカー機能 ---
 
     // localStorageから習慣をロード
     const loadHabits = () => {
+        console.log('Loading habits from localStorage.'); // デバッグ用
         const storedHabits = localStorage.getItem('habits');
         if (storedHabits) {
-            try { // JSON.parseのエラーハンドリングを追加
+            try {
                 habits = JSON.parse(storedHabits);
+                console.log('Habits loaded successfully:', habits); // デバッグ用
             } catch (e) {
                 console.error("習慣データの読み込みに失敗しました。データをリセットします。", e);
-                habits = []; // データが不正な場合はリセット
-                saveHabits(); // 空のデータを保存して次回以降のエラーを防ぐ
+                habits = [];
+                saveHabits();
+                showCustomAlert('習慣データの読み込みに失敗しました。データが破損している可能性があります。', null);
             }
         } else {
             habits = [];
+            console.log('No habits found in localStorage. Initializing empty array.'); // デバッグ用
         }
         renderHabits();
     };
 
     // 習慣をlocalStorageに保存
     const saveHabits = () => {
-        localStorage.setItem('habits', JSON.stringify(habits));
+        try {
+            localStorage.setItem('habits', JSON.stringify(habits));
+            console.log('Habits saved to localStorage.'); // デバッグ用
+        } catch (e) {
+            console.error('Failed to save habits to localStorage:', e);
+            showCustomAlert('習慣の保存に失敗しました。ブラウザのストレージがいっぱいかもしれません。', null);
+        }
     };
 
     // 習慣リストをUIに描画
     const renderHabits = () => {
+        console.log('renderHabits called. Current habits:', habits); // デバッグ用
         habitListUl.innerHTML = '';
         habits.forEach(habit => {
             const listItem = document.createElement('li');
@@ -279,6 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     listItem.classList.remove('completed');
                 }
                 saveHabits();
+                console.log(`Habit "${habit.name}" completion status changed to: ${habit.isCompleted}`); // デバッグ用
             });
 
             const textSpan = document.createElement('span');
@@ -290,6 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteButton.classList.add('delete-habit-button');
             deleteButton.addEventListener('click', () => {
                 deleteHabit(habit.id);
+                console.log(`Delete button clicked for habit ID: ${habit.id}`); // デバッグ用
             });
 
             listItem.appendChild(checkbox);
@@ -312,11 +409,15 @@ document.addEventListener('DOMContentLoaded', () => {
             newHabitInput.value = '';
             saveHabits();
             renderHabits();
+            console.log('New habit added:', newHabit.name); // デバッグ用
+        } else {
+            console.log('Attempted to add empty habit.'); // デバッグ用
         }
     };
 
     // 習慣を削除
     const deleteHabit = (idToDelete) => {
+        console.log('Deleting habit with ID:', idToDelete); // デバッグ用
         habits = habits.filter(habit => habit.id !== idToDelete);
         saveHabits();
         renderHabits();
@@ -324,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // すべてのチェックを解除する機能
     const clearAllHabitChecks = () => {
+        console.log('Clearing all habit checks.'); // デバッグ用
         habits.forEach(habit => {
             habit.isCompleted = false;
         });
@@ -345,60 +447,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- タイマー機能 ---
 
-    // localStorageからタイマー設定と記録をロードし、入力フィールドに反映
-    const loadTimerSettings = () => {
-        const storedWorkTime = localStorage.getItem('workTime');
-        const storedBreakTime = localStorage.getItem('breakTime');
-        const storedTimerRecords = localStorage.getItem('timerRecords');
-
-        // 作業時間の設定
-        if (storedWorkTime !== null) {
-            workTimeTotalSeconds = parseInt(storedWorkTime, 10);
-        } else {
-            workTimeTotalSeconds = 30 * 60;
-        }
-        workTimeMinutesInput.value = Math.floor(workTimeTotalSeconds / 60);
-        workTimeSecondsInput.value = workTimeTotalSeconds % 60;
-
-        // 休憩時間の設定
-        if (storedBreakTime !== null) {
-            breakTimeTotalSeconds = parseInt(storedBreakTime, 10);
-        } else {
-            breakTimeTotalSeconds = 5 * 60;
-        }
-        breakTimeMinutesInput.value = Math.floor(breakTimeTotalSeconds / 60);
-
-        // タイマーモードと残り時間の初期設定
-        currentTimerType = 'work';
-        currentSettingDisplayType = 'work';
-        remainingTime = workTimeTotalSeconds;
-
-        // 記録のロード
-        if (storedTimerRecords) {
-            try { // JSON.parseのエラーハンドリングを追加
-                timerRecords = JSON.parse(storedTimerRecords);
-            } catch (e) {
-                console.error("タイマー記録データの読み込みに失敗しました。データをリセットします。", e);
-                timerRecords = []; // データが不正な場合はリセット
-                saveTimerRecords(); // 空のデータを保存して次回以降のエラーを防ぐ
-            }
-        } else {
-            timerRecords = [];
-        }
-        renderTimerRecords();
-
-        updateTimerDisplay();
-        updateSettingDisplay();
-    };
-
     // タイマー設定をlocalStorageに保存
     const saveTimerSettings = () => {
-        localStorage.setItem('workTime', workTimeTotalSeconds.toString());
-        localStorage.setItem('breakTime', breakTimeTotalSeconds.toString());
+        try {
+            localStorage.setItem('workTime', workTimeTotalSeconds.toString());
+            localStorage.setItem('breakTime', breakTimeTotalSeconds.toString());
+            console.log('Timer settings saved to localStorage.'); // デバッグ用
+        } catch (e) {
+            console.error('Failed to save timer settings to localStorage:', e);
+            showCustomAlert('設定の保存に失敗しました。ブラウザのストレージがいっぱいかもしれません。', null);
+        }
     };
 
     // タイマー設定を保存ボタンのイベントリスナー
     saveTimerSettingsButton.addEventListener('click', () => {
+        console.log('Save Timer Settings button clicked.'); // デバッグ用
         const newWorkMinutes = parseInt(workTimeMinutesInput.value, 10);
         const newWorkSeconds = parseInt(workTimeSecondsInput.value, 10);
         const newBreakMinutes = parseInt(breakTimeMinutesInput.value, 10);
@@ -410,10 +473,12 @@ document.addEventListener('DOMContentLoaded', () => {
             isNaN(newBreakTotalSeconds) || newBreakTotalSeconds < 0 ||
             isNaN(newWorkSeconds) || newWorkSeconds < 0 || newWorkSeconds > 59) {
             showCustomAlert('作業時間と休憩時間は正しく設定してください（分は0以上、秒は0〜59）。', null);
+            console.warn('Invalid timer settings input.'); // デバッグ用
             return;
         }
         if (newWorkTotalSeconds === 0 && newBreakTotalSeconds === 0) {
             showCustomAlert('作業時間または休憩時間のいずれか一方、または両方を1秒以上に設定してください。', null);
+            console.warn('Both work and break times are 0.'); // デバッグ用
             return;
         }
 
@@ -431,14 +496,20 @@ document.addEventListener('DOMContentLoaded', () => {
         pauseTimer();
         updateTimerDisplay();
         showCustomAlert('タイマー設定を保存しました。', null);
+        console.log('Timer settings saved and updated.'); // デバッグ用
     });
 
 
     // タイマーを開始
     const startTimer = () => {
-        if (timerInterval) return;
+        console.log('Start Timer button clicked.'); // デバッグ用
+        if (timerInterval) {
+            console.log('Timer already running.'); // デバッグ用
+            return;
+        }
         if (remainingTime <= 0) {
             showCustomAlert('タイマーが0のため開始できません。リセットするか設定を変更してください。', null);
+            console.warn('Cannot start timer, remainingTime is 0.'); // デバッグ用
             return;
         }
 
@@ -447,13 +518,16 @@ document.addEventListener('DOMContentLoaded', () => {
             updateTimerDisplay();
 
             if (remainingTime <= 0) {
+                console.log('Timer reached 0. Clearing interval.'); // デバッグ用
                 clearInterval(timerInterval);
                 timerInterval = null;
-                playNotificationSound(); // 音を鳴らす
+                playNotificationSound();
+
+                addTimerRecord('auto');
 
                 showCustomAlert(`${currentTimerType === 'work' ? '作業' : '休憩'}時間終了！`, () => {
-                    addTimerRecord('auto'); // 自動記録
                     switchTimerTypeAndStart(true);
+                    console.log('Alert OK button clicked, switching to next timer.'); // デバッグ用
                 });
             }
         }, 1000);
@@ -461,12 +535,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // タイマーを一時停止
     const pauseTimer = () => {
+        console.log('Pause Timer button clicked. Clearing interval if exists.'); // デバッグ用
         clearInterval(timerInterval);
         timerInterval = null;
     };
 
     // タイマーをリセット
     const resetTimer = () => {
+        console.log('Reset Timer button clicked.'); // デバッグ用
         pauseTimer();
         if (currentTimerType === 'work') {
             remainingTime = workTimeTotalSeconds;
@@ -474,6 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
             remainingTime = breakTimeTotalSeconds;
         }
         updateTimerDisplay();
+        console.log('Timer reset. Remaining time:', remainingTime); // デバッグ用
     };
 
     // タイマー関連のイベントリスナー
@@ -481,10 +558,31 @@ document.addEventListener('DOMContentLoaded', () => {
     pauseTimerButton.addEventListener('click', pauseTimer);
     resetTimerButton.addEventListener('click', resetTimer);
     recordTimerButton.addEventListener('click', () => {
+        console.log('Manual Record button clicked.'); // デバッグ用
         addTimerRecord('manual');
     });
     clearTimerRecordsButton.addEventListener('click', clearTimerRecords);
 
+    // タイマー設定の「切り替え」ボタンのイベントリスナー
+    toggleDisplayTypeButton.addEventListener('click', () => {
+        console.log('Toggle Display Type button clicked.'); // デバッグ用
+        pauseTimer();
+
+        if (currentSettingDisplayType === 'work') {
+            currentSettingDisplayType = 'break';
+            currentTimerType = 'break';
+            remainingTime = breakTimeTotalSeconds;
+        } else {
+            currentSettingDisplayType = 'work';
+            currentTimerType = 'work';
+            remainingTime = workTimeTotalSeconds;
+        }
+        
+        updateSettingDisplay();
+        updateTimerDisplay();
+    });
+
     // タイマー設定の初期ロードと表示
     loadTimerSettings();
+    console.log('Initial loadTimerSettings completed.'); // デバッグ用
 });
