@@ -43,9 +43,121 @@ document.addEventListener('DOMContentLoaded', () => {
     let timerStartTime = 0; // タイマーが開始されたUnixタイム（ミリ秒）
 
     // 通知音ファイルへのパスを設定
-    const NOTIFICATION_SOUND = new Audio('non_existent_notification.mp3'); // 存在しないファイル名
-// または
-    //const NOTIFICATION_SOUND = new Audio(''); // 空のパス
+    const NOTIFICATION_SOUND = new Audio('notification.mp3'); 
+
+    // --- 共通機能・ヘルパー関数の定義 ---
+    // updateTimerDisplay と updateSettingDisplay を先頭に移動
+    
+    // タイマー表示を更新
+    const updateTimerDisplay = () => {
+        const minutes = Math.floor(remainingTime / 60);
+        const seconds = remainingTime % 60;
+        timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        timerTypeDisplay.textContent = currentTimerType === 'work' ? '作業' : '休憩';
+        // ブラウザのタブタイトルも更新
+        document.title = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} | ${currentTimerType === 'work' ? '作業' : '休憩'}タイマー`;
+    };
+
+    // 設定表示の切り替え（作業時間と休憩時間の設定入力欄の表示を切り替える）
+    const updateSettingDisplay = () => {
+        if (currentSettingDisplayType === 'work') {
+            workTimeSettingDiv.classList.add('active-setting');
+            workTimeSettingDiv.classList.remove('hidden-setting');
+            breakTimeSettingDiv.classList.add('hidden-setting');
+            breakTimeSettingDiv.classList.remove('active-setting');
+        } else {
+            workTimeSettingDiv.classList.add('hidden-setting');
+            workTimeSettingDiv.classList.remove('active-setting');
+            breakTimeSettingDiv.classList.add('active-setting');
+            breakTimeSettingDiv.classList.remove('hidden-setting');
+        }
+    };
+
+    // 通知音を鳴らす
+    const playNotificationSound = () => {
+        NOTIFICATION_SOUND.play().catch(e => console.error("通知音の再生に失敗しました:", e));
+    };
+
+    // タイマータイプを切り替えて、必要なら開始する関数 (自動終了時と手動切り替えの両方で使用)
+    // isAutoStart: 自動で切り替わった場合 (true) は自動開始、手動 (false/未指定) は自動開始しない
+    const switchTimerTypeAndStart = (isAutoStart = false) => {
+        pauseTimer(); // 切り替える前に必ずタイマーを停止
+
+        if (currentTimerType === 'work') {
+            currentTimerType = 'break';
+            currentSettingDisplayType = 'break'; // 設定表示のタイプも連動
+            remainingTime = breakTimeTotalSeconds;
+        } else {
+            currentTimerType = 'work';
+            currentSettingDisplayType = 'work'; // 設定表示のタイプも連動
+            remainingTime = workTimeTotalSeconds;
+        }
+        
+        elapsedTime = 0; // タイプ切り替え時に経過時間もリセット
+        timerStartTime = 0; // 開始時刻もリセット
+
+        updateTimerDisplay(); // タイマー本体の表示を更新
+        updateSettingDisplay(); // 設定入力欄の表示を更新
+
+        // isAutoStart が true で、かつ残り時間が0より大きい場合にのみ、新しいタイマーを自動的に開始
+        if (isAutoStart && remainingTime > 0) {
+            startTimer();
+        }
+    };
+
+    // タイマー記録を追加 (タイプに応じてメッセージを変更)
+    const addTimerRecord = (recordType) => {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        
+        // 記録時点の経過時間を計算
+        let currentElapsedTime = elapsedTime;
+        if (timerStartTime > 0 && timerInterval !== null) { // タイマーが動作中の場合
+            currentElapsedTime = Math.floor((Date.now() - timerStartTime) / 1000);
+        }
+        
+        const elapsedMinutes = Math.floor(currentElapsedTime / 60);
+        const elapsedSeconds = currentElapsedTime % 60;
+        const formattedElapsedTime = `${elapsedMinutes.toString().padStart(2, '0')}分 ${elapsedSeconds.toString().padStart(2, '0')}秒`;
+
+        // 記録時点の残り時間を計算
+        const remainingMinutes = Math.floor(remainingTime / 60);
+        const remainingSeconds = remainingTime % 60;
+        const formattedRemainingTime = `${remainingMinutes.toString().padStart(2, '0')}分 ${remainingSeconds.toString().padStart(2, '0')}秒`;
+
+        let recordContent = '';
+        if (recordType === 'auto') {
+            recordContent = `自動記録 (${currentTimerType === 'work' ? '作業' : '休憩'}): ${formattedElapsedTime} (残り${formattedRemainingTime})`;
+        } else if (recordType === 'manual') {
+            recordContent = `手動記録 (${currentTimerType === 'work' ? '作業' : '休憩'}): ${formattedElapsedTime} (残り${formattedRemainingTime})`;
+        }
+
+        if (recordContent) {
+            const recordText = `${recordContent} @ ${timeString}`; // 記録時刻も追加
+            timerRecords.push(recordText);
+            renderTimerRecords();
+        }
+    };
+
+    // タイマー記録をUIに描画
+    const renderTimerRecords = () => {
+        timerRecordList.innerHTML = '';
+        timerRecords.forEach(record => {
+            const listItem = document.createElement('li');
+            listItem.textContent = record;
+            timerRecordList.appendChild(listItem);
+        });
+        timerRecordList.scrollTop = timerRecordList.scrollHeight;
+    };
+
+    // タイマー記録をすべて削除
+    const clearTimerRecords = () => {
+        if (confirm('本当にすべてのタイマー記録を削除しますか？')) {
+            timerRecords = [];
+            renderTimerRecords();
+        }
+    };
+
 
     // --- 共通機能 ---
 
@@ -73,7 +185,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadHabits = () => {
         const storedHabits = localStorage.getItem('habits');
         if (storedHabits) {
-            habits = JSON.parse(storedHabits);
+            try { // JSON.parseのエラーハンドリングを追加
+                habits = JSON.parse(storedHabits);
+            } catch (e) {
+                console.error("習慣データの読み込みに失敗しました。データをリセットします。", e);
+                habits = []; // データが不正な場合はリセット
+                saveHabits(); // 空のデータを保存して次回以降のエラーを防ぐ
+            }
         } else {
             habits = [];
         }
@@ -244,21 +362,6 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('タイマー設定を保存しました。');
     });
 
-    // 設定表示の切り替え（作業時間と休憩時間の設定入力欄の表示を切り替える）
-    const updateSettingDisplay = () => {
-        if (currentSettingDisplayType === 'work') {
-            workTimeSettingDiv.classList.add('active-setting');
-            workTimeSettingDiv.classList.remove('hidden-setting');
-            breakTimeSettingDiv.classList.add('hidden-setting');
-            breakTimeSettingDiv.classList.remove('active-setting');
-        } else {
-            workTimeSettingDiv.classList.add('hidden-setting');
-            workTimeSettingDiv.classList.remove('active-setting');
-            breakTimeSettingDiv.classList.add('active-setting');
-            breakTimeSettingDiv.classList.remove('hidden-setting');
-        }
-    };
-
     // タイマー表示タイプと残り時間を切り替える機能（設定部の「切り替え」ボタン用）
     toggleDisplayTypeButton.addEventListener('click', () => {
         pauseTimer(); // タイマーが動いていたら停止
@@ -282,16 +385,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTimerDisplay(); // タイマー本体の表示を更新
     });
 
-
-    // タイマー表示を更新
-    const updateTimerDisplay = () => {
-        const minutes = Math.floor(remainingTime / 60);
-        const seconds = remainingTime % 60;
-        timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        timerTypeDisplay.textContent = currentTimerType === 'work' ? '作業' : '休憩';
-        // ブラウザのタブタイトルも更新
-        document.title = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} | ${currentTimerType === 'work' ? '作業' : '休憩'}タイマー`;
-    };
 
     // タイマーを開始
     const startTimer = () => {
@@ -345,91 +438,6 @@ document.addEventListener('DOMContentLoaded', () => {
         timerStartTime = 0; // 開始時刻もリセット
     };
 
-    // タイマータイプを切り替えて、必要なら開始する関数 (自動終了時と手動切り替えの両方で使用)
-    // isAutoStart: 自動で切り替わった場合 (true) は自動開始、手動 (false/未指定) は自動開始しない
-    const switchTimerTypeAndStart = (isAutoStart = false) => {
-        pauseTimer(); // 切り替える前に必ずタイマーを停止
-
-        if (currentTimerType === 'work') {
-            currentTimerType = 'break';
-            currentSettingDisplayType = 'break'; // 設定表示のタイプも連動
-            remainingTime = breakTimeTotalSeconds;
-        } else {
-            currentTimerType = 'work';
-            currentSettingDisplayType = 'work'; // 設定表示のタイプも連動
-            remainingTime = workTimeTotalSeconds;
-        }
-        
-        elapsedTime = 0; // タイプ切り替え時に経過時間もリセット
-        timerStartTime = 0; // 開始時刻もリセット
-
-        updateTimerDisplay(); // タイマー本体の表示を更新
-        updateSettingDisplay(); // 設定入力欄の表示を更新
-
-        // isAutoStart が true で、かつ残り時間が0より大きい場合にのみ、新しいタイマーを自動的に開始
-        if (isAutoStart && remainingTime > 0) {
-            startTimer();
-        }
-    };
-
-
-    // 通知音を鳴らす
-    const playNotificationSound = () => {
-        NOTIFICATION_SOUND.play().catch(e => console.error("通知音の再生に失敗しました:", e));
-    };
-
-    // タイマー記録を追加 (タイプに応じてメッセージを変更)
-    const addTimerRecord = (recordType) => {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        
-        // 記録時点の経過時間を計算
-        let currentElapsedTime = elapsedTime;
-        if (timerStartTime > 0 && timerInterval !== null) { // タイマーが動作中の場合
-            currentElapsedTime = Math.floor((Date.now() - timerStartTime) / 1000);
-        }
-        
-        const elapsedMinutes = Math.floor(currentElapsedTime / 60);
-        const elapsedSeconds = currentElapsedTime % 60;
-        const formattedElapsedTime = `${elapsedMinutes.toString().padStart(2, '0')}分 ${elapsedSeconds.toString().padStart(2, '0')}秒`;
-
-        // 記録時点の残り時間を計算
-        const remainingMinutes = Math.floor(remainingTime / 60);
-        const remainingSeconds = remainingTime % 60;
-        const formattedRemainingTime = `${remainingMinutes.toString().padStart(2, '0')}分 ${remainingSeconds.toString().padStart(2, '0')}秒`;
-
-        let recordContent = '';
-        if (recordType === 'auto') {
-            recordContent = `自動記録 (${currentTimerType === 'work' ? '作業' : '休憩'}): ${formattedElapsedTime} (残り${formattedRemainingTime})`;
-        } else if (recordType === 'manual') {
-            recordContent = `手動記録 (${currentTimerType === 'work' ? '作業' : '休憩'}): ${formattedElapsedTime} (残り${formattedRemainingTime})`;
-        }
-
-        if (recordContent) {
-            const recordText = `${recordContent} @ ${timeString}`; // 記録時刻も追加
-            timerRecords.push(recordText);
-            renderTimerRecords();
-        }
-    };
-
-    // タイマー記録をUIに描画
-    const renderTimerRecords = () => {
-        timerRecordList.innerHTML = '';
-        timerRecords.forEach(record => {
-            const listItem = document.createElement('li');
-            listItem.textContent = record;
-            timerRecordList.appendChild(listItem);
-        });
-        timerRecordList.scrollTop = timerRecordList.scrollHeight;
-    };
-
-    // タイマー記録をすべて削除
-    const clearTimerRecords = () => {
-        if (confirm('本当にすべてのタイマー記録を削除しますか？')) {
-            timerRecords = [];
-            renderTimerRecords();
-        }
-    };
 
     // タイマー関連のイベントリスナー
     startTimerButton.addEventListener('click', startTimer);
