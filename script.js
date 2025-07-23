@@ -147,18 +147,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 設定表示の切り替え
     const updateSettingDisplay = () => {
+        // hidden-section と active-setting クラスを適切に管理
         if (currentSettingDisplayType === 'work') {
             workTimeSettingDiv.classList.add('active-setting');
-            workTimeSettingDiv.classList.remove('hidden-setting');
-            breakTimeSettingDiv.classList.add('hidden-section'); // ここは hidden-section が正しい
+            workTimeSettingDiv.classList.remove('hidden-section'); // hidden-section を削除
+            breakTimeSettingDiv.classList.add('hidden-section'); // hidden-section を追加
             breakTimeSettingDiv.classList.remove('active-setting');
         } else {
-            workTimeSettingDiv.classList.add('hidden-section'); // ここは hidden-section が正しい
+            workTimeSettingDiv.classList.add('hidden-section'); // hidden-section を追加
             workTimeSettingDiv.classList.remove('active-setting');
             breakTimeSettingDiv.classList.add('active-setting');
-            breakTimeSettingDiv.classList.remove('hidden-section');
+            breakTimeSettingDiv.classList.remove('hidden-section'); // hidden-section を削除
         }
-        // console.log('Setting Display Updated. Current type:', currentSettingDisplayType); // デバッグ用
+        console.log('Setting Display Updated. Current type:', currentSettingDisplayType); // デバッグ用
     };
 
     // 通知音を鳴らす
@@ -275,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const recordText = `${recordContent} @ ${timeString}`;
             console.log('Adding record:', recordText); // デバッグ用
             timerRecords.push(recordText);
-            saveTimerRecords(); // ここで saveTimerRecords が呼ばれる
+            saveTimerRecords();
             renderTimerRecords();
         } else {
             console.log('Record content was empty, not adding record.'); // デバッグ用
@@ -486,6 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
         breakTimeTotalSeconds = newBreakTotalSeconds;
         saveTimerSettings();
 
+        // 設定保存後も現在の表示タイプを維持し、残り時間を更新
         if (currentSettingDisplayType === 'work') {
             currentTimerType = 'work';
             remainingTime = workTimeTotalSeconds;
@@ -570,11 +572,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (currentSettingDisplayType === 'work') {
             currentSettingDisplayType = 'break';
-            currentTimerType = 'break';
+            currentTimerType = 'break'; // 休憩時間に切り替える
             remainingTime = breakTimeTotalSeconds;
         } else {
             currentSettingDisplayType = 'work';
-            currentTimerType = 'work';
+            currentTimerType = 'work'; // 作業時間に切り替える
             remainingTime = workTimeTotalSeconds;
         }
         
