@@ -467,4 +467,56 @@ h2 {
         min-width: unset; /* Remove min-width constraint */
         max-width: unset; /* Remove max-width constraint */
     }
+
+    /* style.css に追加 */
+.modal {
+    display: none; /* デフォルトは非表示 */
+    position: fixed; /* 画面全体を覆う */
+    z-index: 1000; /* 他の要素より手前に表示 */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7); /* 半透明の黒背景 */
+    justify-content: center; /* 中央寄せ */
+    align-items: center; /* 中央寄せ */
+    backdrop-filter: blur(5px); /* 背景をぼかす */
+}
+
+.modal.show {
+    display: flex; /* 表示するときは flex にして中央寄せを有効にする */
+}
+
+.modal-content {
+    background-color: var(--secondary-bg-color); /* 定義した背景色 */
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    max-width: 400px;
+    width: 90%;
+    border: 1px solid var(--border-color); /* 枠線を追加 */
+}
+
+#alert-message {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: var(--text-color); /* テキストの色 */
+}
+
+#alert-ok-button {
+    background-color: var(--accent-color); /* アクセントカラー */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+#alert-ok-button:hover {
+    background-color: var(--accent-color-hover); /* ホバー時の色 */
+}
 }
