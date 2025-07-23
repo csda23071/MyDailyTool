@@ -12,7 +12,7 @@
         <h1>私の生産性ツール</h1>
 
         <div class="tabs">
-            <button id="show-habit-tracker">習慣トラッカー</button>
+            <button id="show-habit-tracker" class="active">習慣トラッカー</button>
             <button id="show-study-timer">タイマー</button>
         </div>
 
@@ -67,6 +67,13 @@
                 <button id="clear-timer-records-button" class="clear-button">記録の削除</button>
             </div>
         </section>
+    </div>
+
+    <div id="custom-alert-modal" class="modal-overlay hidden-modal">
+        <div class="modal-content">
+            <p id="modal-message"></p>
+            <button id="modal-ok-button">OK</button>
+        </div>
     </div>
 
     <script src="script.js"></script>
