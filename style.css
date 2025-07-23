@@ -1,474 +1,351 @@
-/* General Body Styles */
+/* 変数の定義 */
+:root {
+    --primary-bg-color: #f4f7f6; /* 薄いグレー */
+    --secondary-bg-color: #ffffff; /* 白 */
+    --text-color: #333; /* 濃いグレー */
+    --accent-color: #4CAF50; /* 緑 */
+    --accent-color-hover: #45a049; /* 濃い緑 */
+    --button-bg-color: #007bff; /* 青 */
+    --button-bg-color-hover: #0056b3; /* 濃い青 */
+    --border-color: #ddd; /* 薄いボーダー色 */
+    --shadow-color: rgba(0, 0, 0, 0.1); /* 影の色 */
+    --completed-text-color: #777; /* チェック済みテキストの色 */
+    --completed-bg-color: #e0e0e0; /* チェック済み背景色 */
+}
+
+/* ダークモードの調整 */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-bg-color: #2b2b2b; /* ダークグレー */
+        --secondary-bg-color: #3c3c3c; /* さらに濃いグレー */
+        --text-color: #f0f0f0; /* 白っぽい色 */
+        --accent-color: #66BB6A; /* 明るい緑 */
+        --accent-color-hover: #5cb85c; /* 少し濃い緑 */
+        --button-bg-color: #1a75ff; /* 明るい青 */
+        --button-bg-color-hover: #0066cc; /* 少し濃い青 */
+        --border-color: #555; /* 濃いボーダー色 */
+        --shadow-color: rgba(0, 0, 0, 0.3); /* 濃い影の色 */
+        --completed-text-color: #aaa; /* チェック済みテキストの色 */
+        --completed-bg-color: #4a4a4a; /* チェック済み背景色 */
+    }
+}
+
+/* 基本スタイル */
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f7f6;
-    color: #333;
+    background-color: var(--primary-bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
     display: flex;
     flex-direction: column;
-    align-items: center;
     min-height: 100vh;
 }
 
-/* Header Styles */
 header {
-    width: 100%;
-    background-color: #28a745; /* Green */
-    color: white;
-    padding: 15px 0;
+    background-color: var(--secondary-bg-color);
+    color: var(--text-color);
+    padding: 1rem 0;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px var(--shadow-color);
 }
 
-/* Navigation Buttons */
+header h1 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 2em;
+}
+
 nav button {
-    background-color: #218838; /* Darker Green */
+    background-color: var(--button-bg-color);
     color: white;
-    border: none;
     padding: 10px 20px;
-    margin: 0 5px;
+    border: none;
     border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
+    margin: 0 5px;
     transition: background-color 0.3s ease;
 }
 
 nav button:hover {
-    background-color: #1e7e34; /* Even Darker Green */
+    background-color: var(--button-bg-color-hover);
 }
 
-/* Main Content Area */
 main {
-    background-color: #ffffff;
-    margin: 20px;
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* 上部に寄せる */
+    padding-top: 40px; /* ヘッダーとの間に少しスペース */
+}
+
+section {
+    background-color: var(--secondary-bg-color);
     padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 600px; /* Limit overall width */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px var(--shadow-color);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto; /* 中央寄せ */
+    box-sizing: border-box; /* パディングを幅に含める */
 }
 
-/* Section Titles */
-h2 {
-    color: #28a745; /* Green */
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-/* Section Visibility Control */
+/* セクションの表示/非表示 */
 .hidden-section {
     display: none;
 }
 
 .active-section {
-    display: block;
+    display: block; /* デフォルトのブロック表示に戻す */
 }
 
-/* Habit Tracker Section */
-.habit-input {
+h2 {
+    text-align: center;
+    color: var(--accent-color);
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+}
+
+/* フォーム要素 */
+.input-area {
     display: flex;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
-.habit-input input[type="text"] {
+.input-area input[type="text"] {
     flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px 0 0 5px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
     font-size: 1em;
+    background-color: var(--primary-bg-color); /* 入力フィールドの背景 */
+    color: var(--text-color);
 }
 
-.habit-input button {
-    padding: 10px 15px;
-    background-color: #007bff; /* Blue */
+.input-area input[type="text"]::placeholder {
+    color: var(--completed-text-color);
+}
+
+.input-area button,
+.action-button,
+.timer-controls button,
+#save-timer-settings {
+    background-color: var(--accent-color);
     color: white;
+    padding: 12px 20px;
     border: none;
-    border-radius: 0 5px 5px 0;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
     transition: background-color 0.3s ease;
+    white-space: nowrap; /* ボタン内のテキストを折り返さない */
 }
 
-.habit-input button:hover {
-    background-color: #0056b3; /* Darker Blue */
+.input-area button:hover,
+.action-button:hover,
+.timer-controls button:hover,
+#save-timer-settings:hover {
+    background-color: var(--accent-color-hover);
 }
 
+/* 習慣リスト */
 #habit-list {
     list-style: none;
     padding: 0;
+    margin-bottom: 25px;
 }
 
 #habit-list li {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid #eee;
+    background-color: var(--primary-bg-color);
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    margin-bottom: 8px;
+    transition: background-color 0.3s ease;
+    flex-wrap: wrap; /* 小さい画面で折り返す */
 }
 
-#habit-list li:last-child {
-    border-bottom: none;
+#habit-list li.completed {
+    background-color: var(--completed-bg-color);
 }
 
-#habit-list input[type="checkbox"] {
+#habit-list li input[type="checkbox"] {
     margin-right: 10px;
-    transform: scale(1.3); /* Slightly larger checkbox */
+    transform: scale(1.3); /* チェックボックスを少し大きくする */
+    cursor: pointer;
 }
 
-#habit-list .habit-text {
+#habit-list li .habit-text {
     flex-grow: 1;
     font-size: 1.1em;
-    opacity: 1;
-    transition: opacity 0.3s ease;
+    color: var(--text-color);
+    word-break: break-all; /* 長い単語でも折り返す */
 }
 
-/* Strikethrough and fade for completed habits */
 #habit-list li.completed .habit-text {
-    opacity: 0.5;
     text-decoration: line-through;
+    color: var(--completed-text-color);
 }
 
-#habit-list .delete-habit-button {
-    background-color: #dc3545; /* Red */
+#habit-list li .delete-habit-button {
+    background-color: #dc3545; /* 赤 */
     color: white;
     border: none;
-    padding: 6px 10px;
-    border-radius: 4px;
+    padding: 8px 12px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 0.85em;
+    font-size: 0.9em;
+    margin-left: 15px;
     transition: background-color 0.3s ease;
 }
 
-#habit-list .delete-habit-button:hover {
-    background-color: #c82333; /* Darker Red */
+#habit-list li .delete-habit-button:hover {
+    background-color: #c82333; /* 濃い赤 */
 }
 
-/* Common Action Button Style (e.g., Clear all checks) */
-.action-button {
-    display: block;
-    width: fit-content; /* Adjusts to content width */
-    margin: 20px auto 0; /* Center horizontally, space above */
-    padding: 10px 20px;
-    background-color: #6c757d; /* Grey */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
-}
-
-.action-button:hover {
-    background-color: #5a6268; /* Darker Grey */
-}
-
-
-/* Timer Section */
-.timer-settings {
-    display: flex;
-    flex-direction: column; /* Stack settings vertically */
-    align-items: center; /* Center horizontally */
-    gap: 15px; /* Space between setting rows and button group */
-    margin-bottom: 30px;
-    min-height: 100px; /* To prevent layout shift when setting type changes */
-}
-
-/* New: Styles for the individual timer setting sections (work/break) */
-.timer-setting-section {
-    width: 100%; /* Ensure they take full width */
-    display: flex; /* Flexbox for centering content */
-    justify-content: center; /* Center horizontally */
-}
-
-/* Controls visibility of setting sections */
-.active-setting {
-    display: block; /* Show the active setting */
-}
-
-.hidden-setting {
-    display: none; /* Hide the inactive setting */
-}
-
-.timer-settings .setting-row {
-    display: flex;
-    align-items: center;
-    gap: 5px; /* Space between elements in a row */
-    width: 100%; /* Take full width of parent */
-    justify-content: center; /* Center elements within the row */
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
-}
-
-.timer-settings label {
-    font-size: 1em;
-    white-space: nowrap; /* Prevent label from wrapping */
-    margin-right: 5px; /* Space between label and input */
-}
-
-.timer-settings input[type="number"] {
-    width: 55px; /* Fixed width for number inputs */
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1em;
-    text-align: center;
-}
-
-.timer-settings span { /* "分" and "秒" text */
-    white-space: nowrap;
-    margin-right: 10px; /* Space after "分" or "秒" */
-}
-
-/* Styles for the setting buttons container */
-.timer-settings .setting-buttons {
-    display: flex; /* Make buttons in this container horizontal */
-    gap: 10px; /* Space between the "切り替え" and "設定保存" buttons */
-    justify-content: center; /* Center the buttons within their container */
-    width: 100%; /* Ensure the container takes full width */
-    margin-top: 10px; /* Space above this button group */
-}
-
-/* Styles for individual setting buttons */
-.timer-settings .setting-buttons button {
-    padding: 8px 15px;
-    background-color: #6c757d; /* Grey */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
-    flex-grow: 1; /* Allow buttons to grow to fill space */
-    max-width: 120px; /* Max width for these buttons */
-}
-
-.timer-settings .setting-buttons button:hover {
-    background-color: #5a6268; /* Darker Grey */
-}
-
-/* Specific style for the new toggle display type button */
-#toggle-display-type-button {
-    background-color: #ff9800; /* Orange color for distinction */
-}
-
-#toggle-display-type-button:hover {
-    background-color: #e68a00;
-}
-
-
-.timer-display {
+/* タイマーセクション */
+.timer-display-area {
     text-align: center;
     margin-bottom: 30px;
 }
 
 #timer-type {
     font-size: 1.5em;
-    color: #28a745; /* Green */
+    font-weight: bold;
+    color: var(--accent-color);
     margin-bottom: 10px;
 }
 
-#time-display {
-    font-size: 4em;
+.time-display {
+    font-size: 5em;
     font-weight: bold;
-    color: #333;
-    margin: 0;
+    color: var(--text-color);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    background-color: var(--primary-bg-color);
+    padding: 20px 30px;
+    border-radius: 10px;
+    display: inline-block; /* 中央寄せのため */
+    min-width: 250px; /* 少し幅を確保 */
 }
 
 .timer-controls {
     display: flex;
-    flex-wrap: wrap; /* Allow buttons to wrap to next line */
-    justify-content: center; /* Center buttons horizontally */
-    gap: 15px; /* Space between buttons */
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
 }
 
 .timer-controls button {
-    padding: 12px 25px;
-    font-size: 1.1em;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    color: white;
-    min-width: 100px; /* Minimum width for buttons */
-    flex-grow: 1; /* Allow buttons to grow and fill space */
-    max-width: 150px; /* Maximum width to prevent over-stretching */
+    min-width: 100px; /* ボタンの最小幅を揃える */
 }
 
-/* Specific Timer Control Button Colors */
-#start-timer-button {
-    background-color: #28a745; /* Green */
+.timer-settings-area {
+    background-color: var(--primary-bg-color);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    border: 1px solid var(--border-color);
 }
 
-#start-timer-button:hover {
-    background-color: #218838;
-}
-
-#pause-timer-button {
-    background-color: #ffc107; /* Yellow */
-    color: #333; /* Dark text for contrast */
-}
-
-#pause-timer-button:hover {
-    background-color: #e0a800;
-}
-
-#reset-timer-button {
-    background-color: #17a2b8; /* Cyan */
-}
-
-#reset-timer-button:hover {
-    background-color: #138496;
-}
-
-#record-timer-button {
-    background-color: #007bff; /* Blue */
-}
-
-#record-timer-button:hover {
-    background-color: #0056b3;
-}
-
-/* Timer Records Section */
-.timer-records {
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-}
-
-.timer-records h3 {
+.timer-settings-area h3,
+.timer-records-area h3 {
     text-align: center;
-    color: #28a745; /* Green */
-    margin-bottom: 15px;
+    color: var(--text-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.4em;
+}
+
+.setting-controls {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.time-setting-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.time-setting-group h4 {
+    font-size: 1.2em;
+    color: var(--accent-color);
+    margin: 0;
+}
+
+.time-setting-group input[type="number"] {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1em;
+    text-align: center;
+    background-color: var(--secondary-bg-color);
+    color: var(--text-color);
+}
+
+#save-timer-settings {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.timer-records-area {
+    background-color: var(--primary-bg-color);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
 }
 
 #timer-record-list {
     list-style: none;
     padding: 0;
-    max-height: 200px; /* Max height for scrollable list */
-    overflow-y: auto; /* Enable vertical scrolling */
-    border: 1px solid #eee;
+    max-height: 200px; /* スクロール可能にする */
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
     border-radius: 5px;
-    background-color: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: var(--secondary-bg-color);
 }
 
 #timer-record-list li {
-    padding: 10px 15px;
-    border-bottom: 1px solid #eee;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-color);
     font-size: 0.95em;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    color: var(--text-color);
 }
 
 #timer-record-list li:last-child {
     border-bottom: none;
 }
 
-#timer-record-list li .record-time { /* Not currently used in JS, but good to have */
-    color: #666;
-    font-size: 0.85em;
+#clear-timer-records-button {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    background-color: #dc3545; /* 赤 */
+}
+
+#clear-timer-records-button:hover {
+    background-color: #c82333; /* 濃い赤 */
 }
 
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    main {
-        margin: 15px;
-        padding: 20px;
-    }
-
-    nav button {
-        padding: 8px 15px;
-        font-size: 0.9em;
-    }
-
-    .habit-input input[type="text"],
-    .habit-input button {
-        font-size: 0.9em;
-    }
-
-    #habit-list li {
-        padding: 10px 0;
-    }
-
-    #habit-list .habit-text {
-        font-size: 1em;
-    }
-
-    #time-display {
-        font-size: 3em; /* Smaller font for timer */
-    }
-
-    .timer-settings .setting-buttons button {
-        max-width: none; /* Allow buttons to take full available width in smaller screens */
-    }
-
-    .timer-controls button {
-        padding: 10px 20px;
-        font-size: 1em;
-        min-width: 80px; /* Smaller min-width for buttons */
-        flex-grow: 1; /* Allow growing */
-        max-width: none; /* Remove max-width on smaller screens to allow full width */
-    }
-}
-
-@media (max-width: 480px) {
-    header {
-        padding: 10px 0;
-    }
-
-    nav button {
-        display: block; /* Stack navigation buttons vertically */
-        width: calc(100% - 20px); /* Full width minus padding */
-        margin: 5px auto;
-    }
-
-    /* Timer settings layout for very small screens */
-    .timer-settings {
-        align-items: stretch; /* Stretch content within the column */
-    }
-
-    .timer-settings .setting-row {
-        flex-direction: row; /* Keep elements in a row */
-        justify-content: flex-start; /* Align to the left */
-        gap: 5px; /* Reduce gap */
-    }
-
-    .timer-settings label {
-        width: auto;
-        text-align: left;
-        margin-right: 5px;
-    }
-
-    .timer-settings input[type="number"] {
-        width: 50px; /* Even smaller input width */
-        margin-bottom: 0;
-    }
-    
-    .timer-settings span {
-        margin-right: 5px;
-    }
-
-    /* Timer setting buttons for very small screens */
-    .timer-settings .setting-buttons {
-        flex-direction: column; /* Stack setting buttons vertically */
-        gap: 10px;
-        width: 100%; /* Take full width */
-    }
-
-    .timer-settings .setting-buttons button {
-        width: 100%; /* Full width for stacked buttons */
-        max-width: none;
-    }
-
-    /* Timer control buttons layout for very small screens (2 columns) */
-    .timer-controls button {
-        flex-basis: calc(50% - 7.5px); /* Two columns, accounting for gap */
-        min-width: unset; /* Remove min-width constraint */
-        max-width: unset; /* Remove max-width constraint */
-    }
-
-    /* style.css に追加 */
+/* カスタムアラートモーダル */
 .modal {
     display: none; /* デフォルトは非表示 */
     position: fixed; /* 画面全体を覆う */
@@ -519,4 +396,88 @@ h2 {
 #alert-ok-button:hover {
     background-color: var(--accent-color-hover); /* ホバー時の色 */
 }
+
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.5em;
+    }
+
+    nav button {
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+
+    section {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    h2 {
+        font-size: 1.5em;
+    }
+
+    .time-display {
+        font-size: 3.5em; /* 小さな画面でフォントサイズを調整 */
+        padding: 15px 20px;
+    }
+
+    .timer-controls button {
+        padding: 10px 15px;
+        font-size: 0.9em;
+        min-width: unset; /* 最小幅の指定を解除 */
+    }
+
+    .input-area {
+        flex-direction: column;
+    }
+
+    .input-area button,
+    .action-button,
+    .timer-controls button,
+    #save-timer-settings,
+    #clear-timer-records-button {
+        width: 100%; /* 小さな画面でボタンを横幅いっぱいに */
+        margin-left: 0 !important; /* 強制的に左マージンを解除 */
+        margin-right: 0 !important; /* 強制的に右マージンを解除 */
+        margin-bottom: 10px; /* ボタン間にスペース */
+    }
+
+    #habit-list li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    #habit-list li input[type="checkbox"] {
+        align-self: flex-start;
+    }
+
+    #habit-list li .delete-habit-button {
+        align-self: flex-end;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.2em;
+    }
+    nav button {
+        font-size: 0.8em;
+        padding: 6px 10px;
+    }
+    .time-display {
+        font-size: 2.8em;
+        min-width: unset;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .modal-content {
+        padding: 20px;
+    }
+    #alert-message {
+        font-size: 1em;
+    }
 }
