@@ -43,9 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let timerStartTime = 0; // タイマーが開始されたUnixタイム（ミリ秒）
 
     // 通知音ファイルへのパスを設定
-    //const NOTIFICATION_SOUND = new Audio('non_existent_notification.mp3'); // 存在しないファイル名
+    const NOTIFICATION_SOUND = new Audio('non_existent_notification.mp3'); // 存在しないファイル名
 // または
-    const NOTIFICATION_SOUND = new Audio(''); // 空のパス
+    //const NOTIFICATION_SOUND = new Audio(''); // 空のパス
 
     // --- 共通機能 ---
 
