@@ -28,6 +28,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const timerRecordList = document.getElementById('timer-record-list');
     const clearTimerRecordsButton = document.getElementById('clear-timer-records-button');
 
+    // カスタムアラート関連の要素を追加
+    const customAlertModal = document.getElementById('custom-alert-modal');
+    const alertMessage = document.getElementById('alert-message');
+    const alertOkButton = document.getElementById('alert-ok-button');
+
     // --- グローバル変数 ---
     let habits = [];
     let timerInterval = null; // タイマーが停止していることを明確にするためnullで初期化
@@ -74,7 +79,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 通知音を鳴らす
     const playNotificationSound = () => {
+        // 音が鳴っている間はループさせる
+        NOTIFICATION_SOUND.loop = true; 
         NOTIFICATION_SOUND.play().catch(e => console.error("通知音の再生に失敗しました:", e));
+    };
+
+    // 通知音を停止する
+    const stopNotificationSound = () => {
+        NOTIFICATION_SOUND.pause();
+        NOTIFICATION_SOUND.currentTime = 0; // 再生位置をリセット
+        NOTIFICATION_SOUND.loop = false; // ループを停止
+    };
+
+    // カスタムアラート表示関数
+    const showCustomAlert = (message) => {
+        alertMessage.textContent = message;
+        customAlertModal.classList.add('show');
+        // OKボタンがクリックされたらモーダルを閉じて音を停止
+        alertOkButton.onclick = () => {
+            customAlertModal.classList.remove('show');
+            stopNotificationSound();
+        };
     };
 
     // タイマータイプを切り替えて、必要なら開始する関数 (自動終了時と手動切り替えの両方で使用)
@@ -333,11 +358,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isNaN(newWorkTotalSeconds) || newWorkTotalSeconds < 0 ||
             isNaN(newBreakTotalSeconds) || newBreakTotalSeconds < 0 ||
             isNaN(newWorkSeconds) || newWorkSeconds < 0 || newWorkSeconds > 59) {
-            alert('作業時間と休憩時間は正しく設定してください（分は0以上、秒は0〜59）。');
+            showCustomAlert('作業時間と休憩時間は正しく設定してください（分は0以上、秒は0〜59）。'); // alertを置き換え
             return;
         }
         if (newWorkTotalSeconds === 0 && newBreakTotalSeconds === 0) {
-             alert('作業時間または休憩時間のいずれか一方、または両方を1秒以上に設定してください。');
+             showCustomAlert('作業時間または休憩時間のいずれか一方、または両方を1秒以上に設定してください。'); // alertを置き換え
              return;
         }
 
@@ -358,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         pauseTimer(); // タイマーを一時停止
         updateTimerDisplay(); // 表示を更新
-        alert('タイマー設定を保存しました。');
+        showCustomAlert('タイマー設定を保存しました。'); // alertを置き換え
     });
 
     // タイマー表示タイプと残り時間を切り替える機能（設定部の「切り替え」ボタン用）
@@ -389,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const startTimer = () => {
         if (timerInterval) return; // すでにタイマーが動作中なら何もしない
         if (remainingTime <= 0) {
-            alert('タイマーが0のため開始できません。リセットするか設定を変更してください。');
+            showCustomAlert('タイマーが0のため開始できません。リセットするか設定を変更してください。'); // alertを置き換え
             return;
         }
         
@@ -410,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 timerInterval = null;
                 playNotificationSound(); // 通知音を鳴らす
                 addTimerRecord('auto'); // 自動記録
-                alert(`${currentTimerType === 'work' ? '作業' : '休憩'}時間終了！`);
+                showCustomAlert(`${currentTimerType === 'work' ? '作業' : '休憩'}時間終了！`); // alertを置き換え
                 // 自動終了の場合はタイプを切り替えて、新しいタイマーを自動的に開始
                 switchTimerTypeAndStart(true); 
             }
