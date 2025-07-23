@@ -1,483 +1,341 @@
-/* 変数の定義 */
-:root {
-    --primary-bg-color: #f4f7f6; /* 薄いグレー */
-    --secondary-bg-color: #ffffff; /* 白 */
-    --text-color: #333; /* 濃いグレー */
-    --accent-color: #4CAF50; /* 緑 */
-    --accent-color-hover: #45a049; /* 濃い緑 */
-    --button-bg-color: #007bff; /* 青 */
-    --button-bg-color-hover: #0056b3; /* 濃い青 */
-    --border-color: #ddd; /* 薄いボーダー色 */
-    --shadow-color: rgba(0, 0, 0, 0.1); /* 影の色 */
-    --completed-text-color: #777; /* チェック済みテキストの色 */
-    --completed-bg-color: #e0e0e0; /* チェック済み背景色 */
-}
-
-/* ダークモードの調整 */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --primary-bg-color: #2b2b2b; /* ダークグレー */
-        --secondary-bg-color: #3c3c3c; /* さらに濃いグレー */
-        --text-color: #f0f0f0; /* 白っぽい色 */
-        --accent-color: #66BB6A; /* 明るい緑 */
-        --accent-color-hover: #5cb85c; /* 少し濃い緑 */
-        --button-bg-color: #1a75ff; /* 明るい青 */
-        --button-bg-color-hover: #0066cc; /* 少し濃い青 */
-        --border-color: #555; /* 濃いボーダー色 */
-        --shadow-color: rgba(0, 0, 0, 0.3); /* 濃い影の色 */
-        --completed-text-color: #aaa; /* チェック済みテキストの色 */
-        --completed-bg-color: #4a4a4a; /* チェック済み背景色 */
-    }
-}
-
-/* 基本スタイル */
 body {
     font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: var(--primary-bg-color);
-    color: var(--text-color);
-    line-height: 1.6;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-header {
-    background-color: var(--secondary-bg-color);
-    color: var(--text-color);
-    padding: 1rem 0;
-    text-align: center;
-    border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 2px 4px var(--shadow-color);
-}
-
-header h1 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 2em;
-}
-
-nav button {
-    background-color: var(--button-bg-color);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    margin: 0 5px;
-    transition: background-color 0.3s ease;
-}
-
-nav button:hover {
-    background-color: var(--button-bg-color-hover);
-}
-
-main {
-    flex-grow: 1;
-    padding: 20px;
+    background-color: #f4f7f6;
+    color: #333;
     display: flex;
     justify-content: center;
     align-items: flex-start; /* 上部に寄せる */
-    padding-top: 40px; /* ヘッダーとの間に少しスペース */
+    min-height: 100vh;
+    margin: 20px; /* 全体に余白 */
+    box-sizing: border-box;
 }
 
-section {
-    background-color: var(--secondary-bg-color);
+.container {
+    background-color: #fff;
     padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px var(--shadow-color);
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 600px;
-    margin: 0 auto; /* 中央寄せ */
-    box-sizing: border-box; /* パディングを幅に含める */
+    max-width: 600px; /* 最大幅を設定 */
+    text-align: center;
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-size: 2em;
+}
+
+h2 {
+    color: #34495e;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    font-size: 1.6em;
+}
+
+h3 {
+    color: #555;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #eee;
+}
+
+.tabs button {
+    background-color: #ecf0f1;
+    border: none;
+    padding: 12px 25px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    color: #7f8c8d;
+    transition: all 0.3s ease;
+    border-radius: 8px 8px 0 0;
+    margin: 0 5px; /* ボタン間のスペース */
+}
+
+.tabs button:hover {
+    background-color: #e0e6e7;
+}
+
+.tabs button.active {
+    background-color: #3498db;
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 /* セクションの表示/非表示 */
+section {
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+    margin-top: 20px;
+}
+
+section:first-of-type {
+    border-top: none; /* 最初のセクションは上線なし */
+    margin-top: 0;
+}
+
 .hidden-section {
     display: none;
 }
 
 .active-section {
-    display: block; /* デフォルトのブロック表示に戻す */
+    display: block;
 }
 
-h2 {
-    text-align: center;
-    color: var(--accent-color);
-    margin-top: 0;
-    margin-bottom: 25px;
-    font-size: 1.8em;
-}
-
-/* フォーム要素 */
-.input-area {
+/* 習慣トラッカー */
+.input-group {
     display: flex;
-    gap: 10px;
     margin-bottom: 20px;
+    gap: 10px; /* 要素間の隙間 */
 }
 
-.input-area input[type="text"] {
+.input-group input[type="text"] {
     flex-grow: 1;
     padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
     font-size: 1em;
-    background-color: var(--primary-bg-color); /* 入力フィールドの背景 */
-    color: var(--text-color);
 }
 
-.input-area input[type="text"]::placeholder {
-    color: var(--completed-text-color);
-}
-
-.input-area button,
-.action-button,
-.timer-controls button,
-#save-timer-settings {
-    background-color: var(--accent-color);
+button {
+    background-color: #3498db;
     color: white;
     padding: 12px 20px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 1em;
     transition: background-color 0.3s ease;
-    white-space: nowrap; /* ボタン内のテキストを折り返さない */
 }
 
-.input-area button:hover,
-.action-button:hover,
-.timer-controls button:hover,
-#save-timer-settings:hover {
-    background-color: var(--accent-color-hover);
+button:hover {
+    background-color: #2980b9;
 }
 
-/* 習慣リスト */
+button.clear-button {
+    background-color: #e74c3c;
+    margin-top: 20px;
+}
+
+button.clear-button:hover {
+    background-color: #c0392b;
+}
+
 #habit-list {
     list-style: none;
     padding: 0;
-    margin-bottom: 25px;
+    text-align: left;
 }
 
 #habit-list li {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: var(--primary-bg-color);
-    padding: 12px 15px;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    margin-bottom: 8px;
     transition: background-color 0.3s ease;
-    flex-wrap: wrap; /* 小さい画面で折り返す */
 }
 
 #habit-list li.completed {
-    background-color: var(--completed-bg-color);
+    background-color: #e8f5e9; /* 薄い緑 */
+    opacity: 0.7;
+}
+
+#habit-list li.completed .habit-text {
+    text-decoration: line-through;
+    color: #777;
 }
 
 #habit-list li input[type="checkbox"] {
-    margin-right: 10px;
-    transform: scale(1.3); /* チェックボックスを少し大きくする */
+    margin-right: 15px;
+    width: 20px;
+    height: 20px;
     cursor: pointer;
 }
 
 #habit-list li .habit-text {
     flex-grow: 1;
     font-size: 1.1em;
-    color: var(--text-color);
-    word-break: break-all; /* 長い単語でも折り返す */
-}
-
-#habit-list li.completed .habit-text {
-    text-decoration: line-through;
-    color: var(--completed-text-color);
+    color: #333;
 }
 
 #habit-list li .delete-habit-button {
-    background-color: #dc3545; /* 赤 */
-    color: white;
-    border: none;
+    background-color: #95a5a6; /* グレー系の削除ボタン */
     padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-    margin-left: 15px;
-    transition: background-color 0.3s ease;
+    font-size: 0.85em;
+    border-radius: 6px;
 }
 
 #habit-list li .delete-habit-button:hover {
-    background-color: #c82333; /* 濃い赤 */
+    background-color: #7f8c8d;
 }
 
 /* タイマーセクション */
-.timer-display-area {
-    text-align: center;
-    margin-bottom: 30px;
+.timer-display {
+    background-color: #2c3e50; /* ダークブルー */
+    color: #ecf0f1; /* オフホワイト */
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 #timer-type {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: var(--accent-color);
-    margin-bottom: 10px;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+    display: block;
 }
 
-.time-display {
-    font-size: 5em;
-    font-weight: bold;
-    color: var(--text-color);
-    letter-spacing: 2px;
-    margin-bottom: 20px;
-    background-color: var(--primary-bg-color);
-    padding: 20px 30px;
-    border-radius: 10px;
-    display: inline-block; /* 中央寄せのため */
-    min-width: 250px; /* 少し幅を確保 */
+#time-display {
+    font-family: 'Rajdhani', sans-serif; /* タイマー専用フォント */
+    font-size: 5em; /* 非常に大きく */
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
 }
 
 .timer-controls {
     display: flex;
     justify-content: center;
     gap: 15px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
+    margin-bottom: 25px;
+    flex-wrap: wrap; /* 小さい画面で折り返す */
 }
 
 .timer-controls button {
-    min-width: 100px; /* ボタンの最小幅を揃える */
+    flex: 1 1 auto; /* 要素が伸び縮みする */
+    min-width: 100px; /* 最小幅 */
+    max-width: 150px; /* 最大幅 */
+    padding: 15px;
+    font-size: 1.1em;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
 }
 
-.timer-settings-area {
-    background-color: var(--primary-bg-color);
+/* タイマー設定 */
+.timer-settings {
+    background-color: #f0f0f0;
     padding: 20px;
     border-radius: 10px;
-    margin-bottom: 30px;
-    border: 1px solid var(--border-color);
+    margin-top: 25px;
+    margin-bottom: 25px;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
 }
 
-.timer-settings-area h3,
-.timer-records-area h3 {
-    text-align: center;
-    color: var(--text-color);
-    margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 1.4em;
-}
-
-.setting-controls {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.time-setting-group {
+.timer-settings .setting-controls {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    justify-content: center;
     gap: 10px;
     margin-bottom: 20px;
 }
 
-.time-setting-group h4 {
-    font-size: 1.2em;
-    color: var(--accent-color);
-    margin: 0;
+.timer-settings .setting-controls button {
+    padding: 10px 18px;
+    font-size: 0.9em;
+    max-width: none; /* ボタンの最大幅をリセット */
 }
 
-.time-setting-group input[type="number"] {
-    width: 80px;
+.timer-settings label {
+    display: inline-block;
+    margin-right: 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+.timer-settings input[type="number"] {
+    width: 60px;
     padding: 8px;
-    border: 1px solid var(--border-color);
+    border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 1em;
     text-align: center;
-    background-color: var(--secondary-bg-color);
-    color: var(--text-color);
+    font-size: 1em;
+    margin-right: 5px;
 }
 
-#save-timer-settings {
+.timer-settings .hidden-setting {
+    display: none;
+}
+
+.timer-settings .active-setting {
     display: block;
-    width: fit-content;
-    margin: 0 auto;
+    margin-top: 15px;
 }
 
-.timer-records-area {
-    background-color: var(--primary-bg-color);
+/* タイマー記録 */
+.timer-records {
+    background-color: #f9f9f9;
     padding: 20px;
     border-radius: 10px;
-    border: 1px solid var(--border-color);
+    margin-top: 25px;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
 }
 
 #timer-record-list {
     list-style: none;
     padding: 0;
-    max-height: 200px; /* スクロール可能にする */
-    overflow-y: auto;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 20px;
-    background-color: var(--secondary-bg-color);
+    max-height: 200px; /* 高さを制限 */
+    overflow-y: auto; /* スクロール可能にする */
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #fff;
+    margin-bottom: 15px;
+    text-align: left;
 }
 
 #timer-record-list li {
-    padding: 8px 0;
-    border-bottom: 1px dashed var(--border-color);
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
     font-size: 0.95em;
-    color: var(--text-color);
+    color: #666;
 }
 
 #timer-record-list li:last-child {
     border-bottom: none;
 }
 
-#clear-timer-records-button {
-    display: block;
-    width: fit-content;
-    margin: 0 auto;
-    background-color: #dc3545; /* 赤 */
-}
-
-#clear-timer-records-button:hover {
-    background-color: #c82333; /* 濃い赤 */
-}
-
-
-/* カスタムアラートモーダル */
-.modal {
-    display: none; /* デフォルトは非表示 */
-    position: fixed; /* 画面全体を覆う */
-    z-index: 1000; /* 他の要素より手前に表示 */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.7); /* 半透明の黒背景 */
-    justify-content: center; /* 中央寄せ */
-    align-items: center; /* 中央寄せ */
-    backdrop-filter: blur(5px); /* 背景をぼかす */
-}
-
-.modal.show {
-    display: flex; /* 表示するときは flex にして中央寄せを有効にする */
-}
-
-.modal-content {
-    background-color: var(--secondary-bg-color); /* 定義した背景色 */
-    padding: 30px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    max-width: 400px;
-    width: 90%;
-    border: 1px solid var(--border-color); /* 枠線を追加 */
-}
-
-#alert-message {
-    font-size: 1.2em;
-    margin-bottom: 20px;
-    color: var(--text-color); /* テキストの色 */
-}
-
-#alert-ok-button {
-    background-color: var(--accent-color); /* アクセントカラー */
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
-}
-
-#alert-ok-button:hover {
-    background-color: var(--accent-color-hover); /* ホバー時の色 */
-}
-
-
-/* レスポンシブデザイン */
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 1.5em;
-    }
-
-    nav button {
-        padding: 8px 15px;
-        font-size: 0.9em;
-    }
-
-    section {
+/* レスポンシブ対応 */
+@media (max-width: 480px) {
+    .container {
         padding: 20px;
         margin: 10px;
     }
-
+    h1 {
+        font-size: 1.8em;
+    }
     h2 {
-        font-size: 1.5em;
+        font-size: 1.4em;
     }
-
-    .time-display {
-        font-size: 3.5em; /* 小さな画面でフォントサイズを調整 */
-        padding: 15px 20px;
-    }
-
-    .timer-controls button {
+    .tabs button {
         padding: 10px 15px;
         font-size: 0.9em;
-        min-width: unset; /* 最小幅の指定を解除 */
     }
-
-    .input-area {
-        flex-direction: column;
+    #time-display {
+        font-size: 4em;
     }
-
-    .input-area button,
-    .action-button,
-    .timer-controls button,
-    #save-timer-settings,
-    #clear-timer-records-button {
-        width: 100%; /* 小さな画面でボタンを横幅いっぱいに */
-        margin-left: 0 !important; /* 強制的に左マージンを解除 */
-        margin-right: 0 !important; /* 強制的に右マージンを解除 */
-        margin-bottom: 10px; /* ボタン間にスペース */
-    }
-
-    #habit-list li {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    #habit-list li input[type="checkbox"] {
-        align-self: flex-start;
-    }
-
-    #habit-list li .delete-habit-button {
-        align-self: flex-end;
-        margin-left: 0;
-    }
-}
-
-@media (max-width: 480px) {
-    header h1 {
-        font-size: 1.2em;
-    }
-    nav button {
-        font-size: 0.8em;
-        padding: 6px 10px;
-    }
-    .time-display {
-        font-size: 2.8em;
-        min-width: unset;
-        width: 100%;
-        box-sizing: border-box;
-    }
-    .modal-content {
-        padding: 20px;
-    }
-    #alert-message {
+    .timer-controls button {
+        padding: 12px;
         font-size: 1em;
+        min-width: unset;
+        max-width: unset;
+        flex-basis: 45%; /* 2列表示 */
+    }
+    .input-group {
+        flex-direction: column;
+    }
+    .input-group input[type="text"] {
+        margin-bottom: 10px;
+    }
+    .timer-settings input[type="number"] {
+        width: 50px;
     }
 }
